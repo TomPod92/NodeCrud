@@ -1,10 +1,10 @@
 const express = require('express');
 const router = new express.Router();
-const Product = require('../models/products.model.js');
+const Products = require('../models/products.model.js');
 
 // -------------------Create new product-----------------------
 router.post('/products', async (request, response) => {
-    const newProduct = new Product(request.body);
+    const newProduct = new Products(request.body);
     try {
         await newProduct.save();
         response.status(201).send(newProduct);
@@ -16,7 +16,7 @@ router.post('/products', async (request, response) => {
 // -------------------Fetch all products-----------------------
 router.get('/products', async (request, response) => {
     try {
-        const products = await Product.find();
+        const products = await Products.find();
         response.send(products);
     } catch (error) {
         response.status(500).send(error);
@@ -26,7 +26,7 @@ router.get('/products', async (request, response) => {
 // -------------------Fetch product by ID-----------------------
 router.get('/products/:id', async (request, response) => {
     try {
-        const product = await Product.findById(request.params.id);
+        const product = await Products.findById(request.params.id);
 
         if(!product) response.status(500).send('Product not found');
 
@@ -45,7 +45,7 @@ router.patch('/products/:id', async (request, response) => {
     if(!areUpdatesValid) response.status(400).send('Invalid updates');
 
     try {
-        const product = await Product.findByIdAndUpdate(request.params.id, request.body, {
+        const product = await Products.findByIdAndUpdate(request.params.id, request.body, {
             new: true,
             runValidators: true
         });
@@ -62,7 +62,7 @@ router.patch('/products/:id', async (request, response) => {
 // ---------------------Delete product by ID---------------------
 router.delete('/products/:id', async (request, response) => {
     try {
-        const deletedProduct = await Product.findByIdAndDelete(request.params.id);
+        const deletedProduct = await Products.findByIdAndDelete(request.params.id);
 
         if(!deletedProduct) response.status(404).send('Product not found');
 
