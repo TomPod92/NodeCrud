@@ -17,7 +17,10 @@ router.post('/products', async (request, response) => {
 // -------------------Fetch all products-----------------------
 router.get('/products', async (request, response) => {
     const match = {};
-
+    
+    const limit = parseInt(request.query.limit) || undefined;
+    const startAt = parseInt(request.query.startAt) || undefined;
+    
     // price > than (?greater=123)
     const greater = request.query.greater || 0;
     match.price = { $gte: greater };
@@ -40,7 +43,7 @@ router.get('/products', async (request, response) => {
     }
 
     try {
-        const products = await Products.find(match);
+        const products = await Products.find(match).limit(limit).skip(startAt);
         response.send(products);
     } catch (error) {
         response.status(500).send(error);
