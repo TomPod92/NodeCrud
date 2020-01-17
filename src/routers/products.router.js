@@ -2,6 +2,7 @@ const express = require('express');
 const router = new express.Router();
 const Products = require('../models/products.model.js');
 
+//-------------------------------------------------------------
 // -------------------Create new product-----------------------
 router.post('/products', async (request, response) => {
     const newProduct = new Products(request.body);
@@ -12,17 +13,40 @@ router.post('/products', async (request, response) => {
         response.status(400).send(error)
     }
 });
-
+//--------------------------------------------------------------
 // -------------------Fetch all products-----------------------
 router.get('/products', async (request, response) => {
+    const match = {};
+
+    // price > than (?greater=123)
+    const greater = request.query.greater || 0;
+    match.price = { $gte: greater };
+
+    // price < than (?lower=123)
+    if (request.query.lower) {
+        const lower = request.query.lower
+        match.price = { ...match.price, $lt: lower };
+    }
+
+    // name contains (?name=test)
+    if(request.query.name) {
+        match.name = { $regex: request.query.name }
+    }
+
+    // keywords contains (?greater=test)
+    if(request.query.keyword) {
+        const keyword = request.query.keyword;
+        match.keywords = { $elemMatch: { $regex: keyword }} 
+    }
+
     try {
-        const products = await Products.find();
+        const products = await Products.find(match);
         response.send(products);
     } catch (error) {
         response.status(500).send(error);
     }
 });
-
+//--------------------------------------------------------------
 // -------------------Fetch product by ID-----------------------
 router.get('/products/:id', async (request, response) => {
     try {
@@ -35,7 +59,7 @@ router.get('/products/:id', async (request, response) => {
         response.status(500).send('Can find product for some reason')
     }
 });
-
+//---------------------------------------------------------------
 // -------------------Update product by ID-----------------------
 router.patch('/products/:id', async (request, response) => {
     const updates = Object.keys(request.body);
@@ -58,7 +82,7 @@ router.patch('/products/:id', async (request, response) => {
         console.log(error)
     }
 });
-
+//---------------------------------------------------------------
 // ---------------------Delete product by ID---------------------
 router.delete('/products/:id', async (request, response) => {
     try {
